@@ -29,18 +29,18 @@ class StudentDetailView(DetailView):
 class StudentCreateView(CreateView):
     model = Student
     fields = ('first_name', 'last_name', 'avatar')
-    success_url = reverse_lazy('main:index')
+    success_url = reverse_lazy('main:base')
 
 
 class StudentUpdateView(UpdateView):
     model = Student
     fields = ('first_name', 'last_name', 'avatar',)
-    success_url = reverse_lazy('main:index')
+    success_url = reverse_lazy('main:base')
 
 
 class StudentDeleteView(DeleteView):
     model = Student
-    success_url = reverse_lazy('main:index')
+    success_url = reverse_lazy('main:base')
 
 
 def toggle_activity(request, pk):
@@ -52,7 +52,7 @@ def toggle_activity(request, pk):
 
     student_item.save()
 
-    return redirect(reverse('main:index'))
+    return redirect(reverse('main:base'))
 
 
 class DashboardView(TemplateView):

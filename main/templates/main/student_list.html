@@ -1,37 +1,43 @@
 {% extends 'main/base.html' %}
 {% block content %}
-    <div class="col-12 mb-5">
+<div class="col-12 mb-5">
+    {% if perms.main.add_student %}
         <a class="btn btn-outline-primary" href="{% url 'main:create_student' %}">Добавить студента</a>
-    </div>
-    {% for object in object_list %}
-        <div class="col-md-4">
-            <div class="card mb-4 box-shadow">
-                <div class="card-body">
-                    <p class="card-text">
-                        {% if object.is_active %}
-                            {{ object|title }}
-                        {% else %}
-                            <span class="text-muted">{{ object|title }}</span>
-                        {% endif %}
-                    </p>
+    {% endif %}
+</div>
+{% for object in object_list %}
+<div class="col-md-4">
+    <div class="card mb-4 box-shadow">
+        <div class="card-body">
+            <p class="card-text">
+                {% if object.is_active %}
+                {{ object|title }}
+                {% else %}
+                <span class="text-muted">{{ object|title }}</span>
+                {% endif %}
+            </p>
 
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="btn-group">
-                            <a href="{% url 'main:student_detail' object.pk %}"
-                               class="btn btn-sm btn-outline-info">View</a>
-                            <a href="{% url 'main:update_student' object.pk %}" type="button"
-                               class="btn btn-sm btn-outline-primary">Edit</a>
-                            <a href="{% url 'main:delete_student' object.pk %}" type="button"
-                               class="btn btn-sm btn-outline-danger">Delete</a>
-                        </div>
-                        {% if object.is_active %}
-                            <a class="btn btn-warning" href="{% url 'main:toggle_activity' object.pk %}">Деактивировать</a>
-                        {% else %}
-                            <a class="btn btn-success" href="{% url 'main:toggle_activity' object.pk %}">Активировать</a>
-                        {% endif %}
-                    </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                    <a href="{% url 'main:student_detail' object.pk %}"
+                       class="btn btn-sm btn-outline-info">View</a>
+                    {% if perms.main.change_student %}
+                        <a href="{% url 'main:update_student' object.pk %}" type="button"
+                           class="btn btn-sm btn-outline-primary">Edit</a>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                        <a href="{% url 'main:delete_student' object.pk %}" type="button"
+                           class="btn btn-sm btn-outline-danger">Delete</a>
+                    {% endif %}
                 </div>
+                {% if object.is_active %}
+                <a class="btn btn-warning" href="{% url 'main:toggle_activity' object.pk %}">Деактивировать</a>
+                {% else %}
+                <a class="btn btn-success" href="{% url 'main:toggle_activity' object.pk %}">Активировать</a>
+                {% endif %}
             </div>
         </div>
-    {% endfor %}
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

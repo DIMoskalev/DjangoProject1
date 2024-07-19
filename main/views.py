@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.forms import inlineformset_factory
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
@@ -7,10 +9,22 @@ from main.forms import StudentForm, SubjectForm
 from main.models import Student, Subject
 
 
-class StudentListView(ListView):
+@login_required
+def index(request):
+    students_list = Student.objects.all()
+    context = {
+        'object_list': students_list,
+        'title': 'Главная'
+    }
+    return render(request, 'main/base.html', context)
+
+
+class StudentListView(LoginRequiredMixin, ListView):
     model = Student
 
 
+@login_required
+@permission_required('main.view_student')
 def contact(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -28,15 +42,17 @@ class StudentDetailView(DetailView):
     model = Student
 
 
-class StudentCreateView(CreateView):
+class StudentCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Student
     form_class = StudentForm
+    permission_required = 'main.add_student'
     success_url = reverse_lazy('main:base')
 
 
-class StudentUpdateView(UpdateView):
+class StudentUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Student
     form_class = StudentForm
+    permission_required = 'main.change_student'
     success_url = reverse_lazy('main:base')
 
     def get_context_data(self, **kwargs):
@@ -58,9 +74,12 @@ class StudentUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class StudentDeleteView(DeleteView):
+class StudentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Student
     success_url = reverse_lazy('main:base')
+
+    def test_func(self):
+        return self.request.user.is_superuser
 
 
 def toggle_activity(request, pk):
@@ -75,5 +94,5 @@ def toggle_activity(request, pk):
     return redirect(reverse('main:base'))
 
 
-class DashboardView(TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard.html'
